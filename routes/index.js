@@ -10,9 +10,11 @@ router.get('/', function(req, res, next) {
 
 router.post('/api/v1/schedule/event-reminder', function(req, res, next) {
   var reminder = req.body;
-  console.log(reminder);
+  var when = new Date();
+  when.setTime(parseInt(reminder.timestamp));
+  when.setDate(when.getDate() - 1);
 
-  agenda.now('event reminder', reminder);
+  agenda.schedule(when, 'event reminder', reminder);
   res.end('Thanks for trying');
 });
 
