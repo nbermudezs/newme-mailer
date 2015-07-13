@@ -6,9 +6,11 @@ var favicon      = require('serve-favicon');
 var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
+var mongoose     = require('mongoose');
 
 var routes       = require('./routes/index');
 var Mailer       = require('./lib/mailer');
+var config       = require('./lib/config');
 
 var app = express();
 var mailer = new Mailer();
@@ -81,8 +83,15 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(app.get('port'), function() {
-	console.log(package.name + " app is running at localhost:" + app.get('port'));
+mongoose.connect(config.get('MAIN_DB_URI'), function(err) {
+  if (err) {
+    console.log('Could not establish connection with the database at ' + config.get('MAIN_DB_URI'));
+    return;
+  }
+  console.log('Connected to db with URI: ' + config.get('MAIN_DB_URI'));
+  app.listen(app.get('port'), function() {
+  	console.log(package.name + " app is running at localhost:" + app.get('port'));
+  });
 });
 
 module.exports = app;
