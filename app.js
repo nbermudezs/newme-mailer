@@ -30,6 +30,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Import MongoDB models
+var UserModel = require('./lib/models/user');
+var EventModel = require('./lib/models/event');
+
 // Enable CORS
 app.use(function(req, res, next) {
 
