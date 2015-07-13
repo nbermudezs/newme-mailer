@@ -1,0 +1,5 @@
+{
+  "MAIN_DB_URI": "mongodb://localhost:27017/newme-main",
+  "SENDGRID_USERNAME": "SOME USERNAME",
+  "SENDGRID_PASSWORD": "SOME PASSWORD"
+}

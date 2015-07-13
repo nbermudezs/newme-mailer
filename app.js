@@ -6,11 +6,11 @@ var favicon      = require('serve-favicon');
 var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
+var mongoose     = require('mongoose');
 
 var routes       = require('./routes/index');
-var users        = require('./routes/users');
-var schedules    = require('./routes/schedules');
 var Mailer       = require('./lib/mailer');
+var config       = require('./lib/config');
 
 var app = express();
 var mailer = new Mailer();
@@ -30,9 +30,31 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Import MongoDB models
+var UserModel = require('./lib/models/user');
+var EventModel = require('./lib/models/event');
+
+// Enable CORS
+app.use(function(req, res, next) {
+
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
+});
+
 app.use('/', routes);
-app.use('/users', users);
-app.use('/schedules', schedules);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -65,28 +87,15 @@ app.use(function(err, req, res, next) {
   });
 });
 
-// Enable CORS
-app.use(function(req, res, next) {
-
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'https://newme.herokuapp.com');
-
-  // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-  // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Pass to next layer of middleware
-  next();
-});
-
-app.listen(app.get('port'), function() {
-	console.log(package.name + " app is running at localhost:" + app.get('port'));
+mongoose.connect(config.get('MAIN_DB_URI'), function(err) {
+  if (err) {
+    console.log('Could not establish connection with the database at ' + config.get('MAIN_DB_URI'));
+    return;
+  }
+  console.log('Connected to db with URI: ' + config.get('MAIN_DB_URI'));
+  app.listen(app.get('port'), function() {
+  	console.log(package.name + " app is running at localhost:" + app.get('port'));
+  });
 });
 
 module.exports = app;
